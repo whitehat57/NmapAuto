@@ -35,6 +35,50 @@ def run_nmap_scan(target, scan_type):
     else:
         return f"Terjadi kesalahan:\n{error.decode('utf-8')}"
 
+def script_scan_sub_options():
+    """
+    Menampilkan sub opsi untuk script scan dan meminta pengguna memilih salah satu atau memasukkan manual.
+    
+    Returns:
+    str: Jenis script scan yang dipilih pengguna.
+    """
+    script_types = {
+        "1": "auth",
+        "2": "broadcast",
+        "3": "default",
+        "4": "discovery",
+        "5": "dos",
+        "6": "exploit",
+        "7": "external",
+        "8": "intrusive",
+        "9": "malware",
+        "10": "safe",
+        "11": "version",
+        "12": "vuln",
+        "13": "Manual (masukkan script scan dan argumen)"
+    }
+    
+    # Tabel untuk menampilkan opsi script scan
+    script_table = PrettyTable()
+    script_table.field_names = ["No.", "Script Type"]
+    for key, value in script_types.items():
+        script_table.add_row([key, value])
+    
+    print("\nPilih jenis script scan dari daftar berikut:")
+    print(script_table)
+    
+    # Input pilihan dari pengguna
+    choice = input("Masukkan nomor pilihan script scan: ")
+    
+    if choice in script_types and choice != "13":
+        return f"--script={script_types[choice]}"
+    elif choice == "13":
+        manual_script = input("Masukkan script scan dan argumen manual (misalnya, http-enum --script-args=http.useragent=Mozilla): ")
+        return f"--script={manual_script}"
+    else:
+        print(Fore.RED + "Pilihan tidak valid, menggunakan script scan default.")
+        return "--script=default"
+
 def main():
     while True:
         # Membuat margin atas
@@ -98,7 +142,10 @@ def main():
         choice = input("Masukkan nomor pilihan metode scanning: ")
 
         if choice in non_root_scan_options:
-            scan_type = non_root_scan_options[choice]
+            if choice == "4":  # Script Scan
+                scan_type = script_scan_sub_options()
+            else:
+                scan_type = non_root_scan_options[choice]
         elif choice in root_scan_options:
             if choice == "9":  # Idle Scan
                 zombie_ip = input("Masukkan Zombie IP untuk Idle Scan: ")
